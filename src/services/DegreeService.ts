@@ -1,5 +1,5 @@
 import { useWorkspace } from "@/composables/useWallet";
-import { fetchFacultyAccount, fetchIdAccount } from "./FetchAccountService"
+import { fetchDegreeAccount, fetchIdAccount } from "./FetchAccountService"
 
 class DegreeService {
 
@@ -15,8 +15,8 @@ class DegreeService {
         const smaller_degree_id_available: number = (await fetchIdAccount(this.workspace.program.value, "degree")).smallerIdAvailable
 
         for (let i = 1; i < smaller_degree_id_available; i++) {
-            const degree = await fetchFacultyAccount(this.workspace.program.value, i)
-            if (degree.id == id) {
+            const degree = await fetchDegreeAccount(this.workspace.program.value, i)
+            if (degree.facultyId == id) {
                 degrees.push(degree)
             }
         }

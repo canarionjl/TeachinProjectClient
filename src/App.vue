@@ -86,7 +86,8 @@
               </i>
               <select class="form-select m-2" v-model="selectedSpecialtyId" @change="onSpecialtyChanged">
                 <option disabled selected class="defaultOption" value="0">Seleccionar Especialidad</option>
-                <option v-for="specialty in specialty_list" :value="specialty.id" :key=specialty.id> {{ specialty.name }} </option>
+                <option v-for="specialty in specialty_list" :value="specialty.id" :key=specialty.id> {{ specialty.name }}
+                </option>
               </select>
             </div>
           </div>
@@ -96,9 +97,9 @@
               <i>
                 <h5 class="m-3 selectHint"> Curso: </h5>
               </i>
-              <select class="form-select m-2" v-model="selectedCourseId" @change="onCourseChanged">
+              <select class="form-select m-2" v-model="selectedCourseId">
                 <option disabled selected class="defaultOption" value="0">Seleccionar Curso</option>
-                <option v-for="course in course_list" :value="course" :key=course> {{ course }} </option>
+                <option v-for="(course, index) in course_list" :value=index :key=index> {{ course }} </option>
               </select>
             </div>
           </div>
@@ -109,7 +110,13 @@
       <div>
 
         <button type="submit" class="btn btn-primary btn-lg m-5 p-3">Buscar asignaturas</button>
-
+        <button type="submit" class="btn btn-primary btn-lg m-5 p-3" @click="onClick">Generar HighRank</button>
+        <!-- <h3>{{ anchorWallet?.publicKey.toBase58() }}</h3> -->
+        <!-- <h3>{{ anchorWallet.publicKey }}</h3>  -->
+        <!-- <h3>{{ anchorWallet.publicKey.toBase58() }}</h3> 
+        <h3>{{  anchorWallet.value }}</h3> 
+        <h3>{{ anchorWallet.value.publicKey }}</h3> 
+        <h3>{{ anchorWallet.value.publicKey.toBase58() }}</h3> -->
       </div>
 
     </div>
@@ -126,11 +133,20 @@ import { useWorkspace } from "@/composables/useWallet"
 import { onMounted, Ref, ref } from "vue";
 import FacultyService from "@/services/FacultyService"
 import DegreeService from "@/services/DegreeService"
+import { initDummyData } from "./composables/useDummyData";
+
+import { initWorkspace } from './composables/useWallet';
+import { initWallet } from "solana-wallets-vue";
+import { walletOptions } from '@/composables/useInitWallet';
+import SpecialtyService from "./services/SpecialtyService";
+import {getCourse, courseList} from "@/composables/useAuxFunctions"
+
+initWallet(walletOptions);
+initWorkspace();
 
 const faculty_service = new FacultyService()
 const degree_service = new DegreeService()
-
-const { program } = useWorkspace()
+const specialty_service = new SpecialtyService()
 
 const faculty_list: Ref = ref(null);
 const degree_list: Ref = ref(null);
@@ -142,25 +158,32 @@ let selectedDegreeId: Ref = ref(0)
 let selectedSpecialtyId: Ref = ref(0)
 let selectedCourseId: Ref = ref(0)
 
+
+
+
 onMounted(async () => {
-  faculty_list.value = await faculty_service.getAllFaculties()
+  faculty_list.value = await new FacultyService().getAllFaculties()
 });
 
 const onFacultyChanged = async () => {
-  degree_list.value = await degree_service.getAllDegreesForFaculty (selectedFacultyId.value)
+  degree_list.value = await degree_service.getAllDegreesForFaculty(selectedFacultyId.value)
 };
 
-const onDegreeChanged = () => {
-  console.log(selectedFacultyId.value)
+const onDegreeChanged = async () => {
+  specialty_list.value = await specialty_service.getAllSpecialtysForDegree(selectedDegreeId.value)
 };
 
-const onSpecialtyChanged = () => {
-  console.log(selectedFacultyId.value)
+const onSpecialtyChanged = async () => {
+  course_list.value = courseList
 };
 
-const onCourseChanged = () => {
-  console.log(selectedFacultyId.value)
-};
+
+const onClick = () => {
+  const {anchorWallet, connection, program } = useWorkspace()
+  initDummyData(anchorWallet, connection, program) 
+}
+
+
 
 </script>
 

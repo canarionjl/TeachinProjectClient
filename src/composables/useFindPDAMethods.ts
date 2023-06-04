@@ -3,28 +3,30 @@ import { utf8 } from "@project-serum/anchor/dist/cjs/utils/bytes";
 import { numberToLEBytes } from "@/composables/useAuxFunctions"
 
 
-export const findPDAforHighRank = async (programId: anchor.web3.PublicKey, authority: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
+export const findPDAforHighRank = async (programId: anchor.web3.PublicKey, wallet: any): Promise<anchor.web3.PublicKey> => {
 
   const [pda, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
-    [utf8.encode("highRank"), authority.toBytes()],
+    [utf8.encode("highRank"), wallet.value.publicKey.toBytes()],
+    programId
+  );
+
+  return pda;
+
+}
+
+export const findPDAforProfessor = async (programId: anchor.web3.PublicKey, wallet: any): Promise<anchor.web3.PublicKey> => {
+
+  const [pda, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
+    [utf8.encode("professor"), wallet.value.publicKey.toBytes()],
     programId
   );
   return pda;
 }
 
-export const findPDAforProfessor = async (programId: anchor.web3.PublicKey, authority: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
+export const findPDAforStudent = async (programId: anchor.web3.PublicKey, wallet: any): Promise<anchor.web3.PublicKey> => {
 
   const [pda, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
-    [utf8.encode("professor"), authority.toBytes()],
-    programId
-  );
-  return pda;
-}
-
-export const findPDAforStudent = async (programId: anchor.web3.PublicKey, authority: anchor.web3.PublicKey): Promise<anchor.web3.PublicKey> => {
-
-  const [pda, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
-    [utf8.encode("student"), authority.toBytes()],
+    [utf8.encode("student"), wallet.value.publicKey.toBytes()],
     programId
   );
   return pda;
@@ -52,6 +54,7 @@ export const findPDAforProposalIdGenerator = async (programId: anchor.web3.Publi
 }
 
 export const findPDAforFaculty = async (programId: anchor.web3.PublicKey, id: number): Promise<anchor.web3.PublicKey> => {
+ 
   const [pda, _bump] = anchor.web3.PublicKey.findProgramAddressSync(
     [utf8.encode("faculty"), numberToLEBytes(id)],
     programId

@@ -1,4 +1,7 @@
-export const IDL = {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.IDL = void 0;
+exports.IDL = {
     "version": "0.1.0",
     "name": "teaching_project_handler",
     "instructions": [
@@ -1513,4 +1516,3 @@ export const IDL = {
         }
     ]
 };
-//# sourceMappingURL=teaching_project_handler.js.map

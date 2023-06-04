@@ -5,13 +5,15 @@ import "bootstrap";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { createPinia } from 'pinia';
 import { walletOptions } from '@/composables/useInitWallet';
-import { initWorkspace } from './composables/useWallet';
-import { initWallet } from "solana-wallets-vue";
+
+
+import { Buffer } from "buffer";
+window.Buffer = window.Buffer || Buffer;
+
+
 
 const pinia = createPinia();
-initWallet(walletOptions);
 
-initWorkspace();
 
 createApp(App)
     .use(pinia)
