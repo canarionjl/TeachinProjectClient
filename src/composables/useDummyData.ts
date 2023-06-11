@@ -7,7 +7,6 @@ import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddres
 import * as useFindPDAMethods from "@/composables/useFindPDAMethods"
 import { fetchIdAccount } from "@/services/FetchAccountService";
 import { useWorkspace } from "./useWallet";
-import { AnchorWallet, useAnchorWallet } from "solana-wallets-vue";
 
 
 const confirmOptions: ConfirmOptions = { commitment: "confirmed" };
@@ -204,10 +203,10 @@ const initializeSpecialty = async (program: Program<TeachingProjectHandler>, anc
     return result;
 }
 
-const initializeSubject = async (program: Program<TeachingProjectHandler>, authority: anchor.web3.Keypair, id: number, name: string, degree_id: number, specialty_id: number, course: any, code: number): Promise<string> => {
+const initializeSubject = async (program: Program<TeachingProjectHandler>, anchorWallet: any, id: number, name: string, degree_id: number, specialty_id: number, course: any, code: number): Promise<string> => {
 
     const pda = await useFindPDAMethods.findPDAforSubject(program.programId, id)
-    const high_rank_pda = await useFindPDAMethods.findPDAforHighRank(program.programId, authority.publicKey)
+    const high_rank_pda = await useFindPDAMethods.findPDAforHighRank(program.programId, anchorWallet)
     const id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "subject")
     const degree_id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "degree")
     const specialty_id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "specialty")
@@ -218,7 +217,7 @@ const initializeSubject = async (program: Program<TeachingProjectHandler>, autho
 
     const result = await program.methods.createSubject(name, degree_id, specialty_id, course, code)
         .accounts({
-            authority: authority.publicKey,
+            authority: anchorWallet.publicKey,
             initializationSystemAccount: systemInitialization,
             highRank: high_rank_pda,
             subjectIdHandler: id_generator_pda,
@@ -228,9 +227,8 @@ const initializeSubject = async (program: Program<TeachingProjectHandler>, autho
             codeIdSubjectRelationAccount: code_id_relation_pda,
             proposalIdHandler: proposalIdHandlerForSubject,
             professorProposalIdHandler: professorProposalIdHandlerForSubject,
-            systemProgram: anchor.web3.SystemProgram.programId,
+            systemProgram: anchor.web3.SystemProgram.programId
         })
-        .signers([authority])
         .rpc();
 
     return result;
@@ -470,6 +468,8 @@ export const initDummyData = async (wallet1: any, connection: any, program_: any
 
     const NUMBER_OF_ELEMENTS = 3
 
+    const courses = [{First:{}}, {Second:{}}, {Third: {}}]
+
 
     for (let i = faculty_id; i < faculty_id + NUMBER_OF_ELEMENTS; i++) {
 
@@ -486,6 +486,13 @@ export const initDummyData = async (wallet1: any, connection: any, program_: any
 
             for (let k = specialty_id; k < specialty_id + NUMBER_OF_ELEMENTS; k++) {
                 await initializeSpecialty(program.value, anchorWallet, k, "Especialidad " + k + " del grado " + j, j)
+
+                const subjectIdAccount = await fetchIdAccount(program.value, "subject")
+                const subject_id = subjectIdAccount.smallerIdAvailable
+
+                for (let m = subject_id; m < subject_id + NUMBER_OF_ELEMENTS; m++) {
+                    await initializeSubject(program.value, anchorWallet, m, "Asignatura " + m + " de la especialidad " + k, j, k, {first: {}}, 40000 + m)
+                }
             }
         }
     }

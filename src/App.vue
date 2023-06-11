@@ -36,92 +36,8 @@
 
   </div>
 
-  <div class="container-fluid">
-
-    <div id="title" class="d-flex flex-column justify-content-center">
-
-      <h1>¡Bienvenido al sistema de proyectos docentes interactivos de la Universidad de Las Palmas de Gran Canaria!</h1>
-
-    </div>
-
-  </div>
-
-
-  <div class="container-fluid">
-
-    <div class="d-flex flex-column align-items-center justify-content-center">
-
-      <div class="container-fluid">
-
-        <div class="d-flex flex-row justify-content-lg-around flex-wrap">
-
-          <div>
-            <div class="d-flex flex-row justify-content-start align-items-center">
-              <i>
-                <h5 class="m-3 selectHint"> Facultad: </h5>
-              </i>
-              <select class="form-select m-2" v-model="selectedFacultyId" @change="onFacultyChanged">
-                <option disabled selected class="defaultOption" value="0">Seleccionar Facultad</option>
-                <option v-for="faculty in faculty_list" :value="faculty.id" :key=faculty.id> {{ faculty.name }} </option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <div class="d-flex flex-row justify-content-start align-items-center">
-              <i>
-                <h5 class="m-3 selectHint"> Grado: </h5>
-              </i>
-              <select class="form-select m-2" v-model="selectedDegreeId" @change="onDegreeChanged">
-                <option disabled selected class="defaultOption" value="0">Seleccionar Grado</option>
-                <option v-for="degree in degree_list" :value="degree.id" :key=degree.id> {{ degree.name }} </option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <div class="d-flex flex-row justify-content-start align-items-center">
-              <i>
-                <h5 class="m-3 selectHint"> Especialidad: </h5>
-              </i>
-              <select class="form-select m-2" v-model="selectedSpecialtyId" @change="onSpecialtyChanged">
-                <option disabled selected class="defaultOption" value="0">Seleccionar Especialidad</option>
-                <option v-for="specialty in specialty_list" :value="specialty.id" :key=specialty.id> {{ specialty.name }}
-                </option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <div class="d-flex flex-row justify-content-start align-items-center">
-              <i>
-                <h5 class="m-3 selectHint"> Curso: </h5>
-              </i>
-              <select class="form-select m-2" v-model="selectedCourseId">
-                <option disabled selected class="defaultOption" value="0">Seleccionar Curso</option>
-                <option v-for="(course, index) in course_list" :value=index :key=index> {{ course }} </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      <div>
-
-        <button type="submit" class="btn btn-primary btn-lg m-5 p-3">Buscar asignaturas</button>
-        <button type="submit" class="btn btn-primary btn-lg m-5 p-3" @click="onClick">Generar HighRank</button>
-        <!-- <h3>{{ anchorWallet?.publicKey.toBase58() }}</h3> -->
-        <!-- <h3>{{ anchorWallet.publicKey }}</h3>  -->
-        <!-- <h3>{{ anchorWallet.publicKey.toBase58() }}</h3> 
-        <h3>{{  anchorWallet.value }}</h3> 
-        <h3>{{ anchorWallet.value.publicKey }}</h3> 
-        <h3>{{ anchorWallet.value.publicKey.toBase58() }}</h3> -->
-      </div>
-
-    </div>
-
-  </div>
+  <router-view />
+  <br><br>
 </template>
 
 
@@ -129,65 +45,15 @@
 <script lang="ts" setup>
 
 import { WalletMultiButton } from "solana-wallets-vue";
-import { useWorkspace } from "@/composables/useWallet"
-import { onMounted, Ref, ref } from "vue";
-import FacultyService from "@/services/FacultyService"
-import DegreeService from "@/services/DegreeService"
-import { initDummyData } from "./composables/useDummyData";
 
 import { initWorkspace } from './composables/useWallet';
 import { initWallet } from "solana-wallets-vue";
 import { walletOptions } from '@/composables/useInitWallet';
-import SpecialtyService from "./services/SpecialtyService";
-import {getCourse, courseList} from "@/composables/useAuxFunctions"
 
 initWallet(walletOptions);
 initWorkspace();
 
-const faculty_service = new FacultyService()
-const degree_service = new DegreeService()
-const specialty_service = new SpecialtyService()
-
-const faculty_list: Ref = ref(null);
-const degree_list: Ref = ref(null);
-const specialty_list: Ref = ref(null);
-const course_list: Ref = ref(null);
-
-let selectedFacultyId: Ref = ref(0)
-let selectedDegreeId: Ref = ref(0)
-let selectedSpecialtyId: Ref = ref(0)
-let selectedCourseId: Ref = ref(0)
-
-
-
-
-onMounted(async () => {
-  faculty_list.value = await new FacultyService().getAllFaculties()
-});
-
-const onFacultyChanged = async () => {
-  degree_list.value = await degree_service.getAllDegreesForFaculty(selectedFacultyId.value)
-};
-
-const onDegreeChanged = async () => {
-  specialty_list.value = await specialty_service.getAllSpecialtysForDegree(selectedDegreeId.value)
-};
-
-const onSpecialtyChanged = async () => {
-  course_list.value = courseList
-};
-
-
-const onClick = () => {
-  const {anchorWallet, connection, program } = useWorkspace()
-  initDummyData(anchorWallet, connection, program) 
-}
-
-
-
 </script>
-
-
 
 <style lang="scss">
 #app {
@@ -195,30 +61,6 @@ const onClick = () => {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   height: 100vh;
-}
-
-#title {
-  background-color: $primary;
-  border-radius: 30px;
-  padding: 20px;
-  margin-bottom: 30px;
-
-  h1 {
-    font-size: xxx-large;
-    color: $complementary;
-    font-style: italic;
-    padding: 15px;
-  }
-
-}
-
-.defaultOption {
-  display: none;
-}
-
-.selectHint {
-  font-size: 16px;
-  font-weight: bold;
 }
 
 #logo {
@@ -237,15 +79,7 @@ const onClick = () => {
   font-weight: 600;
 }
 
-
-
-
 // Overriding Bootstrap classes
-
-.btn-primary {
-  background-color: $primary !important
-}
-
 .navbar {
   background-color: $primary !important;
   margin-bottom: 15px !important;
