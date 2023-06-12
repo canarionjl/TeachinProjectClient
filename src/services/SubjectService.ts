@@ -1,5 +1,5 @@
 import { useWorkspace } from "@/composables/useWallet";
-import { fetchSubjectAccount, fetchIdAccount } from "./FetchAccountService"
+import { fetchSubjectAccount, fetchIdAccount, fetchProfessorAccount, fetchStudentAccount } from "./FetchAccountService"
 import { getCourse } from "@/composables/useAuxFunctions";
 import * as useFindPDAMethods from "@/composables/useFindPDAMethods"
 import * as anchor from "@project-serum/anchor";
@@ -42,6 +42,38 @@ class SubjectService {
         return subjects;
     }
 
+    async getSubjectsForUser (isProfessor: boolean) {
+
+        const anchorWallet = this.workspace.anchorWallet
+        const program = this.workspace.program.value
+
+        const subjects = [];
+        let user: any;
+
+        if(isProfessor) {
+            user = await fetchProfessorAccount(program, anchorWallet) 
+        } else {
+            user = await fetchStudentAccount(program.value, anchorWallet)
+        }
+
+        console.log(user)
+
+        const smaller_subject_id_available: number = (await fetchIdAccount(this.workspace.program.value, "subject")).smallerIdAvailable
+            
+        for (let i = 1; i < smaller_subject_id_available; i++) {
+            
+            const subject = await fetchSubjectAccount(this.workspace.program.value, i)
+            const subjectMustBePushed = user.subjects.includes(subject.code)
+
+            if(subjectMustBePushed) {
+                subjects.push(subject)
+            }
+
+        }    
+
+        return subjects
+    }
+
     async createSubject (name: string, degree_id: number, specialty_id: number, course: any, code: number): Promise<string>  {
 
         const program = this.workspace.program.value
@@ -76,6 +108,11 @@ class SubjectService {
             .rpc();
     
         return result;
+    }
+
+    async fetchSubjectAccountWithId(id: number) {
+        const program = this.workspace.program.value
+        return await fetchSubjectAccount(program, id)
     }
 
 }

@@ -95,14 +95,17 @@
 
         </div>
 
-        <hr class="hr " />
+        <hr class="hr" />
 
         <div id="admin">
+
             <h2>MI GESTIÓN</h2>
-            <AdminMenuComponent auth-code="1111" />
+            <AdminMenuComponent authCode="2222" />
+
         </div>
 
     </div>
+
 </template>
   
   
@@ -110,13 +113,14 @@
 <script lang="ts" setup>
 
 import { useWorkspace } from "@/composables/useWallet"
-import { onMounted, Ref, ref } from "vue";
+import { onBeforeMount, onMounted, Ref, ref } from "vue";
 import FacultyService from "@/services/FacultyService"
 import DegreeService from "@/services/DegreeService"
 import { initDummyData } from "../composables/useDummyData";
 import AdminMenuComponent from "@/components/admin/menu/AdminMenuComponent.vue"
 import SpecialtyService from "../services/SpecialtyService";
 import { courseList } from "@/composables/useAuxFunctions"
+import { useAuthStore } from "@/store/authCodeStore";
 
 const faculty_list: Ref = ref(null);
 const degree_list: Ref = ref(null);
@@ -130,6 +134,17 @@ let selectedCourseId: Ref = ref(0)
 
 let error: Ref = ref(false)
 
+let authCodeRef: Ref = ref("2222")
+
+onBeforeMount(() => {
+
+    const {setAuthCode} = useAuthStore()
+    setAuthCode(authCodeRef.value)
+
+    const {authCode} = useAuthStore()
+    console.log(authCode)
+
+})
 
 onMounted(async () => {
     faculty_list.value = await new FacultyService().getAllFaculties()

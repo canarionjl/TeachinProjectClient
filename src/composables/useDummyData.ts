@@ -57,9 +57,9 @@ const initializeHighRank = async (program: Program<TeachingProjectHandler>, anch
     return result;
 }
 
-const initializeProfessor = async (program: Program<TeachingProjectHandler>, authority: anchor.web3.Keypair, subjects: Array<number>): Promise<string> => {
+const initializeProfessor = async (program: Program<TeachingProjectHandler>, anchorWallet: any, subjects: Array<number>): Promise<string> => {
 
-    const pda = await useFindPDAMethods.findPDAforProfessor(program.programId, authority.publicKey)
+    const pda = await useFindPDAMethods.findPDAforProfessor(program.programId, anchorWallet)
     const id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "professor")
     const high_rank_id_handler = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "highRank")
     const codeIdRelation = await useFindPDAMethods.findPDAforCodeIdRelation(program.programId)
@@ -67,7 +67,7 @@ const initializeProfessor = async (program: Program<TeachingProjectHandler>, aut
 
     const result = await program.methods.createProfessor("2222", subjects)
         .accounts({
-            authority: authority.publicKey,
+            authority: anchorWallet.publicKey,
             initializationSystemAccount: systemInitialization,
             professorIdHandler: id_generator_pda,
             highRankIdHandler: high_rank_id_handler,
@@ -75,7 +75,6 @@ const initializeProfessor = async (program: Program<TeachingProjectHandler>, aut
             codeIdSubjectRelation: codeIdRelation,
             systemProgram: anchor.web3.SystemProgram.programId,
         })
-        .signers([authority])
         .rpc();
 
     return result;
@@ -427,16 +426,6 @@ const deleteRejectedProposalByHighRank = async (program: Program<TeachingProject
 }
 
 
-// const getReturnLog = (confirmedTransaction: any) => {
-//     const prefix = "Program return: ";
-//     let log = confirmedTransaction.meta.logMessages.useFindPDAMethods.find((log: any) =>
-//         log.startsWith(prefix)
-//     );
-//     log = log.slice(prefix.length);
-//     const [key, data] = log.split(" ", 2);
-//     const buffer = Buffer.from(data, "base64");
-//     return [key, data, buffer];
-// };
 
 
 
@@ -459,43 +448,43 @@ export const initDummyData = async (wallet1: any, connection: any, program_: any
 
     const { anchorWallet, program } = useWorkspace()
 
-    await initializeHighRank(program.value, anchorWallet)
+    await initializeProfessor(program.value, anchorWallet, [40001,40002,40003])
 
-    await initializeSystem(program.value, anchorWallet)
+    // await initializeSystem(program.value, anchorWallet)
 
-    const facultyIdAccount = await fetchIdAccount(program.value, "faculty")
-    const faculty_id = facultyIdAccount.smallerIdAvailable
+    // const facultyIdAccount = await fetchIdAccount(program.value, "faculty")
+    // const faculty_id = facultyIdAccount.smallerIdAvailable
 
-    const NUMBER_OF_ELEMENTS = 3
+    // const NUMBER_OF_ELEMENTS = 3
 
-    const courses = [{First:{}}, {Second:{}}, {Third: {}}]
+    // const courses = [{First:{}}, {Second:{}}, {Third: {}}]
 
 
-    for (let i = faculty_id; i < faculty_id + NUMBER_OF_ELEMENTS; i++) {
+    // for (let i = faculty_id; i < faculty_id + NUMBER_OF_ELEMENTS; i++) {
 
-        await initializeFaculty(program.value, anchorWallet, i, "Facultad " + i)
+    //     await initializeFaculty(program.value, anchorWallet, i, "Facultad " + i)
 
-        const degreeIdAccount = await fetchIdAccount(program.value, "degree")
-        const degree_id = degreeIdAccount.smallerIdAvailable
+    //     const degreeIdAccount = await fetchIdAccount(program.value, "degree")
+    //     const degree_id = degreeIdAccount.smallerIdAvailable
 
-        for (let j = degree_id; j < degree_id + NUMBER_OF_ELEMENTS; j++) {
-            await initializeDegree(program.value, anchorWallet, j, "Grado " + j + " de la facultad: " + i, i)
+    //     for (let j = degree_id; j < degree_id + NUMBER_OF_ELEMENTS; j++) {
+    //         await initializeDegree(program.value, anchorWallet, j, "Grado " + j + " de la facultad: " + i, i)
 
-            const specialtyIdAccount = await fetchIdAccount(program.value, "specialty")
-            const specialty_id = specialtyIdAccount.smallerIdAvailable
+    //         const specialtyIdAccount = await fetchIdAccount(program.value, "specialty")
+    //         const specialty_id = specialtyIdAccount.smallerIdAvailable
 
-            for (let k = specialty_id; k < specialty_id + NUMBER_OF_ELEMENTS; k++) {
-                await initializeSpecialty(program.value, anchorWallet, k, "Especialidad " + k + " del grado " + j, j)
+    //         for (let k = specialty_id; k < specialty_id + NUMBER_OF_ELEMENTS; k++) {
+    //             await initializeSpecialty(program.value, anchorWallet, k, "Especialidad " + k + " del grado " + j, j)
 
-                const subjectIdAccount = await fetchIdAccount(program.value, "subject")
-                const subject_id = subjectIdAccount.smallerIdAvailable
+    //             const subjectIdAccount = await fetchIdAccount(program.value, "subject")
+    //             const subject_id = subjectIdAccount.smallerIdAvailable
 
-                for (let m = subject_id; m < subject_id + NUMBER_OF_ELEMENTS; m++) {
-                    await initializeSubject(program.value, anchorWallet, m, "Asignatura " + m + " de la especialidad " + k, j, k, {first: {}}, 40000 + m)
-                }
-            }
-        }
-    }
+    //             for (let m = subject_id; m < subject_id + NUMBER_OF_ELEMENTS; m++) {
+    //                 await initializeSubject(program.value, anchorWallet, m, "Asignatura " + m + " de la especialidad " + k, j, k, {first: {}}, 40000 + m)
+    //             }
+    //         }
+    //     }
+    // }
 
 }
 

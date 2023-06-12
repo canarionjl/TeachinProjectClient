@@ -1,1 +1,1 @@
-declare module "vue-material";
+declare module "crypto-js";

@@ -1,11 +1,13 @@
 
 
 import { defineStore } from 'pinia';
-import { ref, Ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
+import CryptoJS from 'crypto-js';
+
 
 export const useAuthStore = defineStore('authCode', () => {
 
-  const authCode: Ref = ref("0000")
+  const authCode: Ref = ref("2222")
 
   function setAuthCode(code: string) {
 
@@ -16,7 +18,12 @@ export const useAuthStore = defineStore('authCode', () => {
     }
   }
 
-  return { authCode, setAuthCode }
+  const hashedAuthCode = computed(
+    () => CryptoJS.SHA256(authCode.value)
+    
+  )
+
+  return { authCode, setAuthCode, hashedAuthCode }
 
 })
 

@@ -19,10 +19,9 @@
 
             <div class="col-2">
                 <div>
-
-                    <button type="button" id="subjectDetailButton" class="btn btn-primary px-3 py-2"> Ver asignatura
-                    </button>
-
+                    <router-link :to="{ name: 'subjectDetail', params: { id: props.id } }">
+                        <button type="button" id="subjectDetailButton" class="btn btn-primary px-3 py-2"> Ver asignatura </button>
+                    </router-link>
                 </div>
 
             </div>
@@ -50,6 +49,10 @@ const props = defineProps({
         required: true
     },
     pendingProposals: {
+        type: Number,
+        required: true
+    },
+    id: {
         type: Number,
         required: true
     }

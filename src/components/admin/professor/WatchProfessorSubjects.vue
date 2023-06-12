@@ -12,7 +12,7 @@
             <div v-for="(subject, index) in subjectList" :key=index>
 
                 <SubjectListComponent :name="subject.name" :code="subject.code" :course="getCourseIndex(subject.course)"
-                    :pendingProposals="getArrayLength(subject.pendingProposals)" :id="subject.id" />
+                    :pendingProposals="getArrayLength(subject.pendingProposals)" :id="subject.id"/>
 
             </div>
 
@@ -30,34 +30,30 @@
 <script lang="ts" setup>
 
 import SubjectListComponent from "@/components/subjects/SubjectListComponent.vue"
-import { getArrayLength, getCourseIndex } from "@/composables/useAuxFunctions";
+import { getCourseIndex } from "@/composables/useAuxFunctions";
 import SubjectService from "@/services/SubjectService";
 import { onMounted, Ref, ref } from "vue";
+import { getArrayLength } from "@/composables/useAuxFunctions";
 import { useRoute } from "vue-router";
 
 import ErrorMessageComponent from '@/components/error/ErrorMessageComponent.vue'
 
-
-
-let specialty_id = 0;
-let course = 0;
 let subjectList: Ref = ref(null);
+
 let error: Ref = ref(false);
-let errorMessage: Ref = ref("")
-let isLoading: Ref = ref(true)
+let errorMessage: Ref = ref("");
+let isLoading: Ref = ref(true);
 
 onMounted(async () => {
 
-    const route = useRoute()
-
     try {
-        specialty_id = Number(route.params.specialty_id).valueOf()
-        course = Number(route.params.course).valueOf()
-        subjectList.value = await new SubjectService().getSubjectsWith(specialty_id, course)
-        isLoading.value = false;
+
+        subjectList.value = await new SubjectService().getSubjectsForUser(true)
+        isLoading.value = false; 
+
     } catch {
-        isLoading.value = false;
         error.value = true;
+        isLoading.value = false;
         errorMessage.value = "No se ha podido recuperar la lista de asignaturas"
     }
 

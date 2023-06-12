@@ -8,8 +8,12 @@ export const fetchHighRankAccount = async (program: Program<TeachingProjectHandl
     return await program.account.highRank.fetch(await useFindPDAMethods.findPDAforHighRank(program.programId, authority))
 }
 
-export const fetchProfessorAccount = async (program: Program<TeachingProjectHandler>, authority: anchor.web3.PublicKey) => {
-    return await program.account.professor.fetch(await useFindPDAMethods.findPDAforProfessor(program.programId, authority))
+export const fetchProfessorAccount = async (program: Program<TeachingProjectHandler>, anchorWallet: any) => {
+    return await program.account.professor.fetch(await useFindPDAMethods.findPDAforProfessor(program.programId, anchorWallet))
+}
+
+export const fetchStudentAccount = async (program: Program<TeachingProjectHandler>, anchorWallet: any) => {
+    return await program.account.student.fetch(await useFindPDAMethods.findPDAforStudent(program.programId,anchorWallet))
 }
 
 export const fetchFacultyAccount = async (program: Program<TeachingProjectHandler>, id: number) => {
@@ -17,7 +21,6 @@ export const fetchFacultyAccount = async (program: Program<TeachingProjectHandle
 }
 
 export const fetchDegreeAccount = async (program: Program<TeachingProjectHandler>, id: number) => {
-
     return await program.account.degree.fetch(await useFindPDAMethods.findPDAforDegree(program.programId, id))
 };
 
@@ -27,10 +30,6 @@ export const fetchSpecialtyAccount = async (program: Program<TeachingProjectHand
 
 export const fetchSubjectAccount = async (program: Program<TeachingProjectHandler>, id: number) => {
     return await program.account.subject.fetch(await useFindPDAMethods.findPDAforSubject(program.programId, id))
-}
-
-export const fetchStudentAccount = async (program: Program<TeachingProjectHandler>, authority: anchor.web3.PublicKey) => {
-    return await program.account.student.fetch(await useFindPDAMethods.findPDAforStudent(program.programId, authority))
 }
 
 export const fetchProposalAccount = async (program: Program<TeachingProjectHandler>, id: number, subject_code: number) => {
