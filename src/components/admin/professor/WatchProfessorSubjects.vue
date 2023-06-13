@@ -52,14 +52,18 @@ onMounted(async () => {
         isLoading.value = false; 
 
     } catch {
+
         error.value = true;
         isLoading.value = false;
         errorMessage.value = "No se ha podido recuperar la lista de asignaturas"
+
     }
 
     if (!error.value && subjectList.value.length == 0) {
+
         error.value = true;
         errorMessage.value = "No se encuentra ninguna asignatura que cumpla con los requisitos indicados"
+        
     }
 
 })

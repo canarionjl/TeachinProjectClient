@@ -1,7 +1,7 @@
 <template>
     <div id="component">
 
-        <div v-if="isLoading" id="loading">
+        <div v-if="isLoading" id="loading" class="m-5">
 
             <h3>Cargando...</h3>
 
@@ -25,16 +25,15 @@
 
                             <div class="d-flex flex-column justify-content-between align-items-start">
 
-                                <h2>Facultad</h2>
-                                <h4> Course: <i> 3º </i></h4>
+                                <h2><b>{{ faculty.name }}</b></h2>
+                                <h3>{{ specialty.name }}</h3>
 
                             </div>
 
                             <div class="d-flex flex-column justify-content-between align-items-start ">
 
-                                <h2>Código: <i>40000</i></h2>
-                                <h4>Propuestas pendientes: <i>0</i></h4>
-
+                                <h2><b>Código: <i>{{ subject.code }}</i></b></h2>
+                                <h3>Course: <i>{{ getCourseIndex(subject.course) }}º</i></h3>
                             </div>
 
                         </div>
@@ -62,10 +61,10 @@
 
                     <h2>Propuestas pendientes</h2>
                     <hr class="hr">
-                
-                    <div v-for="(proposal,index) in proposalList" :key="index" >
 
-                        <ProposalListComponent :name="proposal.title" :id="proposal.id" />
+                    <div v-for="(proposal, index) in pendingProposalList" :key="index">
+
+                        <ProposalListComponent :name="proposal.title" :id="proposal.id" :showVotingInfo="false" :votingInfo="false"/>
 
                     </div>
 
@@ -92,9 +91,14 @@ import { onMounted, Ref, ref } from 'vue';
 import { useRoute } from "vue-router";
 import ProposalListComponent from '@/components/proposals/ProposalListComponent.vue';
 import ProposalService from '@/services/ProposalService';
+import FacultyService from '@/services/FacultyService';
+import SpecialtyService from '@/services/SpecialtyService';
+import { getCourseIndex } from '@/composables/useAuxFunctions';
 
 let subject: Ref = ref(null)
-let proposalList: Ref = ref (null)
+let faculty: Ref = ref(null)
+let specialty: Ref = ref(null)
+let pendingProposalList: Ref = ref(null)
 
 
 let isLoading: Ref = ref(true)
@@ -107,7 +111,9 @@ onMounted(async () => {
     try {
         const id = Number(route.params.id).valueOf()
         subject.value = await new SubjectService().fetchSubjectAccountWithId(id)
-        proposalList.value = await new ProposalService().getProposalForSubject(subject.value.id, subject.value.code)
+        pendingProposalList.value = await new ProposalService().getProposalForSubjectWithState({ votationInProgress: {} }, subject.value.id, subject.value.code)
+        faculty.value = await new FacultyService().getFacultyWithId(subject.value.id)
+        specialty.value = await new SpecialtyService().getSpecialtyWithId(subject.value.id)
         isLoading.value = false;
     } catch {
         errorMessage.value = "No se ha podido recuperar la información de la asignatura"
@@ -134,15 +140,17 @@ onMounted(async () => {
     margin-inline: 15px;
 
     h2,
+    h3,
     h4 {
         padding-inline: 15px;
     }
-
-    i {
-        font-weight: bold;
-        color: red;
-    }
 }
+
+i {
+    font-weight: bold;
+    color: red;
+}
+
 
 #pendingProposals {
     hr {
@@ -162,6 +170,7 @@ onMounted(async () => {
 #loading {
     h3 {
         color: $complementary;
+        font-weight: bold;
     }
 
     text-align:center;

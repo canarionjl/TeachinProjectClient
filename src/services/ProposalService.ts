@@ -96,19 +96,36 @@ class ProposalService {
         return result;
     }
 
-    async getProposalForSubject(id: number, code: number) {
+    async getProposalForSubjectWithState(state: any, id: number, code: number) {
 
         const program = this.workspace.program.value
-        const anchorWallet = this.workspace.anchorWallet
 
         const proposals = [];
-        const smaller_proposal_id_available: number = (await fetchProposalIdAccount(this.workspace.program.value, false, code)).smallerIdAvailable
+        let smaller_proposal_id_available = (await fetchProposalIdAccount(this.workspace.program.value, false, code)).smallerIdAvailable
 
-        for (let i=1; i<smaller_proposal_id_available; i++) {
-            const proposal = await fetchProposalAccount(program, id, code)
-            proposals.push(proposal)
+        for (let i = 1; i < smaller_proposal_id_available; i++) {
+
+            const proposal = await fetchProposalAccount(program, i, code)
+
+            if (JSON.stringify(proposal.state) == JSON.stringify(state)) {
+                proposals.push(proposal)
+            }
         }
 
+        return proposals
+    }
+
+    async getProposalForSubjectArrayWithState(state: any, subjects: any[]) {
+
+        const proposals = [];
+
+        for (let i = 0; i < subjects.length; i++) {
+
+            const proposalForSubject = await this.getProposalForSubjectWithState(state, subjects[i].id, subjects[i].code)
+            const subject_proposal_tuple = [subjects[i].name, proposalForSubject]
+            proposals.push(subject_proposal_tuple)
+
+        }
         return proposals
     }
 }

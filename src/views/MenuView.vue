@@ -142,7 +142,6 @@ onBeforeMount(() => {
     setAuthCode(authCodeRef.value)
 
     const {authCode} = useAuthStore()
-    console.log(authCode)
 
 })
 

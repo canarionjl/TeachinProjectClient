@@ -26,6 +26,12 @@ class SpecialtyService {
         return specialties;
     }
 
+    async getSpecialtyWithId(id: number) {
+
+        return await fetchSpecialtyAccount(this.workspace.program.value, id)
+        
+    }
+
     async createSpecialty (name: string, degree_id: number): Promise<string>  {
 
         const program = this.workspace.program.value

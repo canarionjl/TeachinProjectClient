@@ -120,9 +120,6 @@ const onCreateProposalClicked = async () => {
         else if (hashedAuthCode.value.toString() == "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69") {
             tx = await new ProposalService().createProposalByProfessor(proposalTitle.value, proposalContent.value, subject.value.id)
         }
-        else {
-            console.log("Not an user")
-        }
 
         const log = await getReturn(true, false, tx)
         if (log == true) {

@@ -26,6 +26,13 @@ class FacultyService {
         return faculties;
     }
 
+    async getFacultyWithId(id: number) {
+
+        return await fetchFacultyAccount(this.workspace.program.value, id)
+        
+    }
+
+
     async createFaculty(name: string): Promise<string> {
 
         const anchorWallet = this.workspace.anchorWallet
