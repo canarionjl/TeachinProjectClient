@@ -93,6 +93,11 @@
 
             </div>
 
+            <div v-show="error">
+                <ErrorMessageComponent
+                    errorMessage="Error: no existen datos o estos no han podido ser recuperados en este momento" />
+            </div>
+
         </div>
 
         <hr class="hr" />
@@ -100,26 +105,25 @@
         <div id="admin">
 
             <h2>MI GESTIÓN</h2>
-            <AdminMenuComponent authCode="2222" />
+            <AdminMenuComponent :authCode="authCode" />
 
         </div>
 
     </div>
-
 </template>
   
   
   
 <script lang="ts" setup>
 
-import { useWorkspace } from "@/composables/useWallet"
 import { onBeforeMount, onMounted, Ref, ref } from "vue";
 import FacultyService from "@/services/FacultyService"
 import DegreeService from "@/services/DegreeService"
-import { initDummyData } from "../composables/useDummyData";
+import { initDummyData } from "@/composables/useDummyData";
 import AdminMenuComponent from "@/components/admin/menu/AdminMenuComponent.vue"
-import SpecialtyService from "../services/SpecialtyService";
+import SpecialtyService from "@/services/SpecialtyService";
 import { courseList } from "@/composables/useAuxFunctions"
+import ErrorMessageComponent from "@/components/error/ErrorMessageComponent.vue";
 import { useAuthStore } from "@/store/authCodeStore";
 
 const faculty_list: Ref = ref(null);
@@ -134,53 +138,58 @@ let selectedCourseId: Ref = ref(0)
 
 let error: Ref = ref(false)
 
-let authCodeRef: Ref = ref("2222")
-
-onBeforeMount(() => {
-
-    const {setAuthCode} = useAuthStore()
-    setAuthCode(authCodeRef.value)
-
-    const {authCode} = useAuthStore()
-
-})
+const {authCode} = useAuthStore()
+let authCodeRef: Ref = ref(authCode)
 
 onMounted(async () => {
-    faculty_list.value = await new FacultyService().getAllFaculties()
+
+    try {
+        faculty_list.value = await new FacultyService().getAllFaculties()
+    } catch {
+        // setError(true)
+    }
+
 });
 
 const onFacultyChanged = async () => {
+
     resetSelectValues(false, true, true, true)
-    degree_list.value = await new DegreeService().getAllDegreesForFaculty(selectedFacultyId.value)
+    try {
+        degree_list.value = await new DegreeService().getAllDegreesForFaculty(selectedFacultyId.value)
+    } catch {
+        // setError(true)
+    }
+
 };
 
 const onDegreeChanged = async () => {
+
     resetSelectValues(false, false, true, true)
-    specialty_list.value = await new SpecialtyService().getAllSpecialtysForDegree(selectedDegreeId.value)
+    try {
+        specialty_list.value = await new SpecialtyService().getAllSpecialtysForDegree(selectedDegreeId.value)
+    } catch {
+        // setError(true)
+    }
+
 };
 
 const onSpecialtyChanged = async () => {
+
     resetSelectValues(false, false, false, true)
     course_list.value = courseList
 };
 
 
+
 const onClick = () => {
-    const { anchorWallet, connection, program } = useWorkspace()
-    initDummyData(anchorWallet, connection, program)
+
+    
+    initDummyData()
+
 }
 
-const validateSelectForm = () => {
-    if (
-        selectedFacultyId.value == 0 ||
-        selectedDegreeId.value == 0 ||
-        selectedSpecialtyId.value == 0
-    ) {
-        error.value = true;
-    }
-    return error.value;
-}
 function resetSelectValues(faculty_ac: boolean, degree_ac: boolean, specialty_ac: boolean, course_ac: boolean) {
+
     if (faculty_ac) {
         selectedFacultyId.value = 0
     }
@@ -193,8 +202,12 @@ function resetSelectValues(faculty_ac: boolean, degree_ac: boolean, specialty_ac
     if (course_ac) {
         selectedCourseId.value = 0
     }
+
 }
 
+function setError(value: boolean) {
+    error.value = value
+}
 
 </script>
   

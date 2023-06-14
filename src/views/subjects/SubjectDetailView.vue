@@ -64,7 +64,7 @@
 
                     <div v-for="(proposal, index) in pendingProposalList" :key="index">
 
-                        <ProposalListComponent :name="proposal.title" :id="proposal.id" :showVotingInfo="false" :votingInfo="false"/>
+                        <ProposalListComponent :name="proposal.title" :id="proposal.id" :showVotingInfo="false" :votingInfo="false" :subjectCode="subject.code"/>
 
                     </div>
 

@@ -7,7 +7,7 @@ import CryptoJS from 'crypto-js';
 
 export const useAuthStore = defineStore('authCode', () => {
 
-  const authCode: Ref = ref("2222")
+  const authCode: Ref = ref("0000")
 
   function setAuthCode(code: string) {
 

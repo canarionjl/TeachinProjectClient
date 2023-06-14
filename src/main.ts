@@ -5,6 +5,7 @@ import "bootstrap";
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { createPinia } from 'pinia';
 import router from '@/router'
+import { useAuthStore } from "@/store/authCodeStore";
 
 import 'vue-material/dist/vue-material.min.css'
 import 'vue-material/dist/theme/default.css'
@@ -18,3 +19,7 @@ createApp(App)
     .use(pinia)
     .use(router)
     .mount('#app');
+
+    
+const { setAuthCode } = useAuthStore()
+setAuthCode("2222")

@@ -101,7 +101,7 @@ class ProposalService {
         const program = this.workspace.program.value
 
         const proposals = [];
-        let smaller_proposal_id_available = (await fetchProposalIdAccount(this.workspace.program.value, false, code)).smallerIdAvailable
+        const smaller_proposal_id_available = (await fetchProposalIdAccount(this.workspace.program.value, false, code)).smallerIdAvailable
 
         for (let i = 1; i < smaller_proposal_id_available; i++) {
 
@@ -122,12 +122,72 @@ class ProposalService {
         for (let i = 0; i < subjects.length; i++) {
 
             const proposalForSubject = await this.getProposalForSubjectWithState(state, subjects[i].id, subjects[i].code)
-            const subject_proposal_tuple = [subjects[i].name, proposalForSubject]
+            const subject_proposal_tuple = [subjects[i].name, subjects[i].code, proposalForSubject]
             proposals.push(subject_proposal_tuple)
 
         }
         return proposals
     }
+
+    async fetchProposalAccountWithId(id: number, subject_code: number) {
+        return await fetchProposalAccount(this.workspace.program.value, id, subject_code)
+    }
+
+    async voteProposalByStudent (proposal_id: number, subject_id: number, profesor_proposal_id: number, vote: boolean, subject_code: number): Promise<string> {
+
+        const program = this.workspace.program.value
+        const anchorWallet = this.workspace.anchorWallet
+
+        const subject_pda = await useFindPDAMethods.findPDAforSubject(program.programId, subject_id)
+        const subject_id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "subject")
+        const student_pda = await useFindPDAMethods.findPDAforStudent(program.programId, anchorWallet)
+        const proposal_pda = await useFindPDAMethods.findPDAforProposal(program.programId, proposal_id, subject_code)
+        const id_professor_generator_pda = await useFindPDAMethods.findPDAforProposalIdGenerator(program.programId, true, subject_code)
+        const professor_proposal_pda = await useFindPDAMethods.findPDAforProfessorProposal(program.programId, profesor_proposal_id, subject_code)
+    
+        const result = await program.methods.voteProposalByStudent(vote)
+            .accounts({
+                authority: anchorWallet.publicKey,
+                votingStudent: student_pda,
+                subjectIdHandler: subject_id_generator_pda,
+                proposalAccount: proposal_pda,
+                subjectAccount: subject_pda,
+                professorProposalIdHandler: id_professor_generator_pda,
+                professorProposalAccount: professor_proposal_pda
+            })
+    
+            .rpc();
+    
+        return result;
+    }
+
+    async voteProposalByProfessor (proposal_id: number, subject_id: number, profesor_proposal_id: number, vote: boolean, subject_code: number): Promise<string> {
+
+        const program = this.workspace.program.value
+        const anchorWallet = this.workspace.anchorWallet
+
+        const subject_pda = await useFindPDAMethods.findPDAforSubject(program.programId, subject_id)
+        const subject_id_generator_pda = await useFindPDAMethods.findPDAforIdGenerator(program.programId, "subject")
+        const professor_pda = await useFindPDAMethods.findPDAforProfessor(program.programId, anchorWallet)
+        const proposal_pda = await useFindPDAMethods.findPDAforProposal(program.programId, proposal_id, subject_code)
+        const id_professor_generator_pda = await useFindPDAMethods.findPDAforProposalIdGenerator(program.programId, true, subject_code)
+        const professor_proposal_pda = await useFindPDAMethods.findPDAforProfessorProposal(program.programId, profesor_proposal_id, subject_code)
+    
+        const result = await program.methods.voteProposalByProfessor(vote)
+            .accounts({
+                authority: anchorWallet.publicKey,
+                votingProfessor: professor_pda,
+                subjectIdHandler: subject_id_generator_pda,
+                proposalAccount: proposal_pda,
+                subjectAccount: subject_pda,
+                professorProposalIdHandler: id_professor_generator_pda,
+                professorProposalAccount: professor_proposal_pda
+            })
+            .rpc();
+    
+        return result;
+    }
+
 }
 
 export default ProposalService

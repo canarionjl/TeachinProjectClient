@@ -444,11 +444,13 @@ let alternativeWallet: anchor.web3.Keypair;
 // wallet4 = await createWallet(connection, 10);
 // alternativeWallet = await createWallet(connection, 10)
 
-export const initDummyData = async (wallet1: any, connection: any, program_: any) => {
+export const initDummyData = async () => {
 
     const { anchorWallet, program } = useWorkspace()
 
-    await initializeProfessor(program.value, anchorWallet, [40001,40002,40003])
+    await initializeProfessor(program.value, anchorWallet, [43222])
+
+    // await initializeHighRank(program.value, anchorWallet)
 
     // await initializeSystem(program.value, anchorWallet)
 

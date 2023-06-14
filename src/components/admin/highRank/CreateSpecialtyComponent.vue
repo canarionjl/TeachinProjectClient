@@ -14,8 +14,7 @@
 
             <select class="form-select mt-3" v-model="selectedDegreeId">
                 <option disabled selected class="defaultOption" value="0">Seleccionar Grado</option>
-                <option v-for="degree in degree_list" :value="degree.id" :key=degree.id> {{ degree.name
-                }}
+                <option v-for="degree in degree_list" :value="degree.id" :key=degree.id> {{ degree.name }}
                 </option>
             </select>
             <small v-if="degreeIdIsValidRef == false"> {{ degreeIdErrorMessageRef }}</small>
@@ -83,7 +82,7 @@ const onCreateSpecialtyClicked = async () => {
 
         const tx = await new SpecialtyService().createSpecialty(specialtyName.value, selectedDegreeId.value)
         const log = await getReturn(true, false, tx)
-        
+
         if (log == true) {
             specialtyAdded.value = true
         }

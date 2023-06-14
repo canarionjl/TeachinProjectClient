@@ -22,10 +22,10 @@
                     <h2>{{ elm[0] }}</h2>
                     <hr class="hr pb-4">
 
-                    <div v-for="(proposal, i) in elm[1]" :key=i class="mb-5">
+                    <div v-for="(proposal, i) in elm[2]" :key=i class="mb-5">
 
                         <ProposalListComponent :name="proposal.title" :id="proposal.id" :showVotingInfo="true"
-                            :votingInfo="userHasVotedTheProposal(proposal)" />
+                            :votingInfo="userHasVotedTheSelectedProposal(proposal)" :subjectCode="elm[1]" />
 
                     </div>
 
@@ -54,91 +54,78 @@ import ErrorMessageComponent from '@/components/error/ErrorMessageComponent.vue'
 import ProposalListComponent from "@/components/proposals/ProposalListComponent.vue";
 import SubjectService from "@/services/SubjectService";
 import { useAuthStore } from "@/store/authCodeStore";
-import UserService from "@/services/UserService";
+import { getUserInfo } from "@/composables/useAuxFunctions"
+import { userHasVotedTheProposal } from "@/composables/useProposalFunctions";
 
 let proposalListOrderedBySubjects: Ref = ref(null);
 let error: Ref = ref(false);
 let errorMessage: Ref = ref("")
 let isLoading: Ref = ref(true)
-let userInfoRef: Ref= ref(null)
+let userInfoRef: Ref = ref(null)
+
 
 const store = useAuthStore()
 const { hashedAuthCode } = storeToRefs(store)
 
-
-
 onMounted(async () => {
+
     await getData()
+
 })
 
 async function getData() {
 
     let isProfessor = false
 
-try {
+    try {
+
+        await getCurrentUserInfo()
+
+        if (hashedAuthCode.value.toString() == "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9") {
+            isProfessor = true
+        }
+        else if (hashedAuthCode.value.toString() == "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69") {
+            isProfessor = false
+        }
+        else {
+            throw new Error("User not authorized: user is neither a professor nor a student")
+        }
+
+        const subjectList = await new SubjectService().getSubjectsForUser(isProfessor)
+        proposalListOrderedBySubjects.value = await new ProposalService().getProposalForSubjectArrayWithState({ votationInProgress: {} }, subjectList)
+
+        isLoading.value = false;
+
+    } catch (err) {
+   
+        isLoading.value = false;
+        error.value = true;
+        errorMessage.value = "No se ha podido recuperar la lista de asignaturas"
+        
+    }
+
+    if (!error.value && proposalListOrderedBySubjects.value.length == 0) {
+
+        error.value = true;
+        errorMessage.value = "No se encuentra ninguna asignatura que cumpla con los requisitos indicados"
+
+    }
+}
+
+function userHasVotedTheSelectedProposal(proposal: any): boolean {
+
+    while (userInfoRef.value == null);
+
+    return userHasVotedTheProposal(userInfoRef.value, proposal)
+
+}
+
+async function getCurrentUserInfo() {
 
     userInfoRef.value = await getUserInfo()
 
-    if (hashedAuthCode.value.toString() == "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9") {
-        isProfessor = true
-    }
-    else if (hashedAuthCode.value.toString() == "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69") {
-        isProfessor = false
-    }
-    else {
-        throw new Error("User not authorized: user is neither a professor nor a student")
-    }
-
-    const subjectList = await new SubjectService().getSubjectsForUser(isProfessor)
-    proposalListOrderedBySubjects.value = await new ProposalService().getProposalForSubjectArrayWithState({ votationInProgress: {} }, subjectList)
-    isLoading.value = false;
-
-} catch (err) {
-    isLoading.value = false;
-    error.value = true;
-    errorMessage.value = "No se ha podido recuperar la lista de asignaturas"
 }
 
-if (!error.value && proposalListOrderedBySubjects.value.length == 0) {
-
-    error.value = true;
-    errorMessage.value = "No se encuentra ninguna asignatura que cumpla con los requisitos indicados"
-
-}
-}
-
-function userHasVotedTheProposal(proposal: any): boolean {
-
-    let user_that_have_voted = [];
-
-   while(userInfoRef.value == null)
-
-    if (userInfoRef.value[0] == true) {
-        user_that_have_voted = proposal.professorsThatHaveVoted
-    } else {
-        user_that_have_voted = proposal.studentsThatHaveVoted
-    }
-
-    let id = userInfoRef.value[1].id 
-
-    return user_that_have_voted.includes(id)
-}
-
-async function getUserInfo (): Promise<[boolean, any]> {
-
-if (hashedAuthCode.value.toString() == "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9") {
-    const user: any = await new UserService().fetchProfessorAccountForWallet()
-    return [true, user]
-}
-
-else if (hashedAuthCode.value.toString() == "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69") {
-    const user: any = await new UserService().fetchStudentAccountForWallet()
-    return [false, user]
-} 
-
-return [false, null];
-
-}
 
 </script>
 

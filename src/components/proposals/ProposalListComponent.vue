@@ -14,14 +14,16 @@
                 <div class="d-flex flex-row justify-content-start align-items-center col-9">
 
                     <h4>{{ nameRef }}</h4>
-                    <h6 class="px-2" v-show="showVotingInfoRef" id="votingInfo">(<i>{{ votingInfoRef}} has votado esta
+                    <h6 class="px-2" v-show="showVotingInfoRef" id="votingInfo">(<i>{{ votingInfoRef }} has votado esta
                             propuesta</i> {{ emojiVotingInfoRef }})
                     </h6>
-                  
+
 
                 </div>
-
-                <button class="btn btn-primary ">Ver propuesta</button>
+                
+                <router-link :to="{ name: 'proposalDetail', params: { proposal_id: idRef, subject_code: subjectCode } }">
+                    <button class="btn btn-primary ">Ver propuesta</button>
+                </router-link>
 
             </div>
 
@@ -40,7 +42,8 @@ const nameRef: Ref = ref(null)
 const idRef: Ref = ref(null)
 const showVotingInfoRef: Ref = ref(false)
 const votingInfoRef: Ref = ref("aún no")
-const emojiVotingInfoRef: Ref = ref ("❌")
+const emojiVotingInfoRef: Ref = ref("❌")
+const subjectCode: Ref = ref(null)
 
 const isLoading: Ref = ref(true)
 const errorMessage: Ref = ref("")
@@ -62,6 +65,10 @@ const props = defineProps({
     votingInfo: {
         type: Boolean,
         required: true
+    },
+    subjectCode: {
+        type: Number,
+        required: true
     }
 })
 
@@ -81,11 +88,14 @@ onBeforeMount(() => {
 
         let value = "aún no"
         let emoji = "❌"
-    
+
         if (votingInfo) {
             value = "ya"
             emoji = "✅"
         }
+     
+        const subject_code = Number(props.subjectCode).valueOf()
+        subjectCode.value = subject_code
 
         votingInfoRef.value = value
         emojiVotingInfoRef.value = emoji

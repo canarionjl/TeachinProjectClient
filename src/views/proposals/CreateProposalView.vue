@@ -42,7 +42,9 @@
                     propuesta</button>
             </div>
 
-
+            <div v-if="proposalAdded == true" id="returnMessage">
+                <SuccessMessageComponent msg="Operación realizada satisfactoriamente" />
+            </div>
 
         </div>
 
@@ -67,7 +69,7 @@ import { getReturn } from '@/composables/useAuxFunctions';
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import ErrorMessageComponent from '@/components/error/ErrorMessageComponent.vue';
-import SuccessMessageComponentVue from '@/components/success/SuccessMessageComponent.vue';
+import SuccessMessageComponent from '@/components/success/SuccessMessageComponent.vue';
 
 let proposalTitle: Ref = ref(null)
 let proposalContent: Ref = ref(null)
@@ -100,7 +102,7 @@ onMounted(async () => {
         isLoading.value = false;
         error.value = true;
     }
-    
+
 })
 
 const onCreateProposalClicked = async () => {
@@ -115,15 +117,22 @@ const onCreateProposalClicked = async () => {
 
     if (titleIsValid && contentIsValid) {
         if (hashedAuthCode.value.toString() == "edee29f882543b956620b26d0ee0e7e950399b1c4222f5de05e06425b4c995e9") {
-           tx = await new ProposalService().createProposalByProfessor(proposalTitle.value, proposalContent.value, subject.value.id)
+
+            tx = await new ProposalService().createProposalByProfessor(proposalTitle.value, proposalContent.value, subject.value.id)
         }
         else if (hashedAuthCode.value.toString() == "318aee3fed8c9d040d35a7fc1fa776fb31303833aa2de885354ddf3d44d8fb69") {
             tx = await new ProposalService().createProposalByProfessor(proposalTitle.value, proposalContent.value, subject.value.id)
         }
+        else {
+            error.value = true
+            errorMessage.value = "Para registrar una nueva propuesta debe estar registrado como profesor o estudiante"
+        }
 
-        const log = await getReturn(true, false, tx)
-        if (log == true) {
-            proposalAdded.value = true
+        if (tx != "") {
+            const log = await getReturn(true, false, tx)
+            if (log == true) {
+                proposalAdded.value = true
+            }
         }
 
 
